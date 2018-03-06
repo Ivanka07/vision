@@ -1,3 +1,9 @@
+#generated files
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+
 # Prerequisites
 *.d
 
