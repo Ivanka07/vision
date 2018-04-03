@@ -2,8 +2,8 @@
 
 from tkinter import *
 from tkinter import filedialog
-
 from PIL import Image, ImageTk
+from os import listdir
 
 class ImageLabeler(Frame):
 
@@ -46,9 +46,6 @@ class ImageLabeler(Frame):
         canvas_frame = Frame(self.master, background='#F5BCA9', width=int(self.width*0.6), height=self.height*0.85, padx = 40, pady = 1)
         canvas_frame.grid(row = 2, column=0, sticky="ew")
 
-        #get all images in directory
-        #if self.path_to_image_dir == '':
-         #   raise Exception('Image directory not slected')
         current_image_path = self.path_to_image_dir + "/result_pose_2018-3-27-18-35-13.png"
         img = ImageTk.PhotoImage(Image.open(current_image_path))
         print(img.height())
@@ -85,7 +82,8 @@ class ImageLabeler(Frame):
         # create a pulldown menu, and add it to the menu bar
         filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="Choose image directory", command=self.choose_image_directory)
-        filemenu.add_command(label="Save", command=self.choose_image_directory)
+        filemenu.add_command(label="Choose label yaml", command=self.choose_lables_file)
+        filemenu.add_command(label="Save lables", command=self.choose_lables_file)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.master.quit)
         menubar.add_cascade(label="File", menu=filemenu)
@@ -96,8 +94,17 @@ class ImageLabeler(Frame):
         print("hello!")
         self.path_to_image_dir = filedialog.askdirectory(initialdir="/home", title="Select image directory")
         print(self.path_to_image_dir)
+        self.get_all_files_in_directory()
         self.show_image()
 
+    def choose_lables_file(self):
+            print("chosinmg lable file!")
+
+
+    def get_all_files_in_directory(self):
+        files = listdir(self.path_to_image_dir)
+        filtered = list(filter(lambda f: f.endswith('.png') or f.endswith('jpeg') or f.endswith('jpg'), files))
+        print(filtered)
 
 if __name__ == '__main__':
     root = Tk()
