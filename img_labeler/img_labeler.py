@@ -8,7 +8,10 @@ from os import listdir
 class ImageLabeler(Frame):
 
     path_to_image_dir = ''
+    img_label = 'Current image'
     current_image_path = ''
+    image_files = list()
+    current_img_number = 0
 
     def __init__(self, width=400, height=400, master = None):
         Frame.__init__(self, master)
@@ -32,7 +35,7 @@ class ImageLabeler(Frame):
         self.master.grid_columnconfigure(0, weight=1)
         self.master.grid_columnconfigure(1, weight=2)
 
-        label_1 = Label(self.master, text = "Current Image: " + self.current_image_path, background='#F8ECE0')
+        label_1 = Label(self.master, textvariable = self.img_label, background='#F8ECE0')
         label_2 = Label(self.master, text = "Curent Labels: " + self.current_image_path,background='#F8ECE0')
 
         label_1.grid(row = 1, column = 0)
@@ -42,12 +45,11 @@ class ImageLabeler(Frame):
         self.init_buttons()
         self.init_menu()
 
-    def show_image(self):
+    def show_image(self, ):
         canvas_frame = Frame(self.master, background='#F5BCA9', width=int(self.width*0.6), height=self.height*0.85, padx = 40, pady = 1)
         canvas_frame.grid(row = 2, column=0, sticky="ew")
 
-        current_image_path = self.path_to_image_dir + "/result_pose_2018-3-27-18-35-13.png"
-        img = ImageTk.PhotoImage(Image.open(current_image_path))
+        img = ImageTk.PhotoImage(Image.open(self.current_image_path))
         print(img.height())
 
         image = Label(canvas_frame, image=img)
@@ -90,21 +92,28 @@ class ImageLabeler(Frame):
 
         self.master.config(menu=menubar)
 
+
     def choose_image_directory(self):
-        print("hello!")
         self.path_to_image_dir = filedialog.askdirectory(initialdir="/home", title="Select image directory")
         print(self.path_to_image_dir)
-        self.get_all_files_in_directory()
-        self.show_image()
+        self.image_files = get_all_files_in_directory(self.path_to_image_dir)
+        if len(self.image_files)>=1:
+            self.current_image_path = self.path_to_image_dir + '/' + self.image_files[self.current_img_number]
+            self.img_label = ''
+            self.img_label = "Current image " + self.current_image_path
+            self.show_image()
 
     def choose_lables_file(self):
             print("chosinmg lable file!")
 
+###################### Helpers #########################
 
-    def get_all_files_in_directory(self):
-        files = listdir(self.path_to_image_dir)
-        filtered = list(filter(lambda f: f.endswith('.png') or f.endswith('jpeg') or f.endswith('jpg'), files))
-        print(filtered)
+def get_all_files_in_directory(path_to_dir):
+    files = listdir(path_to_dir)
+    image_files = list(filter(lambda f: f.endswith('.png') or f.endswith('jpeg') or f.endswith('jpg'), files))
+    return image_files
+
+
 
 if __name__ == '__main__':
     root = Tk()
