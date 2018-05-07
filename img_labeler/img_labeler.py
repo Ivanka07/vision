@@ -6,10 +6,11 @@ from PIL import Image, ImageTk
 from os import listdir
 from config import CLASSES
 from config import BG_COLOR
+from config import IMAGE_DIR
 
 class ImageLabeler(Frame):
 
-    path_to_image_dir = '/home/ivanna/fa_data/images_0'
+    path_to_image_dir = IMAGE_DIR
     img_label = 'Current image'
     current_image_path = ''
     image_files = list()
