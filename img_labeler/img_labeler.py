@@ -1,22 +1,26 @@
 #!/bin/python
 
 from tkinter import *
+import csv
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from os import listdir
+from os import environ
 from config import CLASSES
 from config import BG_COLOR
 from config import IMAGE_DIR
+from config import CSV_FILE
 
 class ImageLabeler(Frame):
 
-    path_to_image_dir = IMAGE_DIR
+    path_to_image_dir = ''
     img_label = 'Current image'
     current_image_path = ''
     image_files = list()
     image_index = 0
     current_img_number = 0
     class_val = None
+
 
     def __init__(self, width=400, height=400, master = None):
         Frame.__init__(self, master)
@@ -47,11 +51,14 @@ class ImageLabeler(Frame):
         label_1.grid(row = 1, column = 0)
         label_2.grid(row=1, column=1)
 
-        if self.path_to_image_dir is not '':
-            self.image_files = get_all_files_in_directory(self.path_to_image_dir)
-            self.image_files = sorted(self.image_files)
-            self.show_image()
+        if IMAGE_DIR is not '':
+            home = environ['HOME']
+            self.path_to_image_dir = home + IMAGE_DIR
+            print  (self.path_to_image_dir)
+            files = get_all_files_in_directory(self.path_to_image_dir)
+            self.image_files = string_to_int_list(files)
 
+            self.show_image()
 
         self.init_buttons()
         self.init_menu()
@@ -80,6 +87,9 @@ class ImageLabeler(Frame):
         buttons_frame = Frame(self.master, background='#F8ECE0', pady=10, padx=10)
         buttons_frame.grid(row=4, column=0, sticky="ew")
 
+        buttons_frame1 = Frame(self.master, background='#F8ECE0', pady=10, padx=10)
+        buttons_frame1.grid(row=4, column=2, sticky="ew")
+
         buttons_frame.grid_columnconfigure(0, weight=1)
         buttons_frame.grid_columnconfigure(1, weight=1)
 
@@ -89,16 +99,37 @@ class ImageLabeler(Frame):
         but_rigth = Button(buttons_frame, text='next image', bg='#92C05D', width=25, height=2, command=self.get_next_image)
         but_rigth.grid(row=0, column=1)
 
+        self.but_save = Button(buttons_frame1, text='save label', bg='#92C05D', activebackground = '#92C05D', width=25, height=2, state = DISABLED, command=self.save_label)
+        self.but_save.grid(row=0, column=1)
+        self.but_save.config(state = ACTIVE)
 
     def get_prev_image(self):
         print('Getting previous image')
+        self.but_save.config(state = ACTIVE)
 
         if  self.current_img_number>0:
             self.current_img_number -= 1
             self.show_image()
 
+    # image;label;class_number
+    def save_label(self):
+        print('store label into csv ')
+        print(self.class_val.get())
+        print(self.current_image_path)
+
+        gesture_class = list(filter(lambda entry: entry[1] == self.class_val.get(),CLASSES))
+        print(gesture_class)
+        row =[]
+        row.append(self.current_image_path)
+        row.append(gesture_class[0][0])
+        row.append(gesture_class[0][1])
+        open_csv_file(row)
+        self.but_save.config(state=DISABLED)
+
+
     def get_next_image(self):
         print('Getting next image')
+        self.but_save.config(state = ACTIVE)
         if len(self.image_files) > self.current_img_number:
             self.current_img_number += 1
             self.show_image()
@@ -159,9 +190,24 @@ def get_all_files_in_directory(path_to_dir):
     image_files = list(filter(lambda f: f.endswith('.png') or f.endswith('jpeg') or f.endswith('jpg'), files))
     return image_files
 
+def open_csv_file(row):
+    path =  environ['HOME'] + CSV_FILE
+    print('opening a csv from ' + path)
+    with open(path, 'a', newline='\n') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=';',quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(row)
 
-
-
+def string_to_int_list(str_list):
+    int_list = []
+    for file_name in str_list:
+        f = file_name.split('.')[0]
+        int_list.append(int(f))
+    int_list = sorted(int_list)
+    sorted_list = []
+    for number in int_list:
+        img_file = str(number) + '.png'
+        sorted_list.append(img_file)
+    return sorted_list
 
 
 if __name__ == '__main__':
